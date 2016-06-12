@@ -257,7 +257,7 @@ describe('features/Replace', function() {
     }));
 
 
-    it('should adopt children', inject(function(elementFactory, replace, elementRegistry) {
+    it('should adopt children', inject(function(elementFactory, replace, elementRegistry, eventBus) {
 
       // given
       var replacement = {
@@ -286,6 +286,27 @@ describe('features/Replace', function() {
     it('should adopt children and show them in the DOM',
       inject(function(canvas, elementFactory, replace, elementRegistry) {
 
+        // given
+        var replacement = {
+          id: 'replacement',
+          width: 300,
+          height: 300
+        };
+
+        // when
+        replace.replaceElement(parentShape, replacement);
+
+        var newShapeContainer = domQuery('[data-element-id="replacement"]', canvas.getContainer());
+
+        // then
+        expect(domQuery('[data-element-id="originalShape"]', newShapeContainer.parentNode)).to.exist;
+        expect(domQuery('[data-element-id="targetShape"]', newShapeContainer.parentNode)).to.exist;
+      })
+    );
+
+
+    it('should retain moved children in command context', inject(function(replace, eventBus) {
+
       // given
       var replacement = {
         id: 'replacement',
@@ -293,17 +314,19 @@ describe('features/Replace', function() {
         height: 300
       };
 
+      eventBus.on('commandStack.elements.move.postExecuted', function(event) {
+        // then
+        var shapes = event.context.shapes;
+        expect(shapes).not.to.be.empty;
+        expect(shapes).to.have.length(3);
+      });
+
       // when
       replace.replaceElement(parentShape, replacement);
-
-      var newShapeContainer = domQuery('[data-element-id="replacement"]', canvas.getContainer());
-
-      // then
-      expect(domQuery('[data-element-id="originalShape"]', newShapeContainer.parentNode)).to.exist;
-      expect(domQuery('[data-element-id="targetShape"]', newShapeContainer.parentNode)).to.exist;
     }));
 
   });
+
 
   describe('undo/redo support', function() {
 
