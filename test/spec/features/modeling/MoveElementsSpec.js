@@ -278,8 +278,8 @@ describe('features/modeling - move elements', function() {
         { primaryShape: otherChildShape });
 
       // then
-      expect(otherChildShape.parent.id).to.equal(parentShape.id);
-      expect(childShape.parent.id).to.equal(rootShape.id);
+      expect(otherChildShape.parent).to.equal(parentShape);
+      expect(childShape.parent).to.equal(rootShape);
 
     }));
 
@@ -297,8 +297,8 @@ describe('features/modeling - move elements', function() {
         { primaryShape: otherChildShape });
 
       // then
-      expect(otherChildShape.parent.id).to.equal(parentShape.id);
-      expect(childShape.parent.id).to.equal(rootShape.id);
+      expect(otherChildShape.parent).to.equal(parentShape);
+      expect(childShape.parent).to.equal(rootShape);
 
     }));
 
@@ -312,12 +312,16 @@ describe('features/modeling - move elements', function() {
       modeling.moveElements([ childShape ], { x: 350, y: -50 }, rootShape);
 
       // when
-      modeling.moveElements([ childShape, otherChildShape ], { x: 400, y: 200 }, otherParentShape,
-        { primaryShape: otherChildShape });
+      modeling.moveElements(
+        [ childShape, otherChildShape ],
+        { x: 400, y: 200 },
+        otherParentShape,
+        { primaryShape: otherChildShape }
+      );
 
       // then
-      expect(otherChildShape.parent.id).to.equal(otherParentShape.id);
-      expect(childShape.parent.id).to.equal(otherParentShape.id);
+      expect(otherChildShape.parent).to.equal(otherParentShape);
+      expect(childShape.parent).to.equal(otherParentShape);
 
     }));
 
@@ -331,14 +335,69 @@ describe('features/modeling - move elements', function() {
       modeling.moveElements([ childShape ], { x: 300, y: -50 }, rootShape);
 
       // when
-      modeling.moveElements([ childShape, otherChildShape ], { x: 280, y: 200 }, otherParentShape,
-        { primaryShape: otherChildShape });
+      modeling.moveElements(
+        [ childShape, otherChildShape ],
+        { x: 280, y: 200 },
+        otherParentShape,
+        { primaryShape: otherChildShape }
+      );
 
       // then
-      expect(otherChildShape.parent.id).to.equal(otherParentShape.id);
-      expect(childShape.parent.id).to.equal(otherParentShape.id);
+      expect(otherChildShape.parent).to.equal(otherParentShape);
+      expect(childShape.parent).to.equal(otherParentShape);
 
     }));
+
+
+    // See https://github.com/bpmn-io/bpmn-js/issues/525
+    it('should keep parent of connection',
+      inject(function(modeling) {
+
+        // given
+        var elements = [
+          childShape,
+          otherChildShape,
+          otherParentShape
+        ];
+
+        // when
+        modeling.moveElements(
+          elements,
+          { x: 0, y: -50 },
+          rootShape,
+          { primaryShape: otherParentShape }
+        );
+
+        // then
+        expect(connection.parent).to.equal(parentShape);
+      })
+    );
+
+
+    // See https://github.com/bpmn-io/bpmn-js/issues/525
+    it('should keep parent of connection when moving with selection',
+      inject(function(modeling) {
+
+        // given
+        var elements = [
+          childShape,
+          connection,
+          otherChildShape,
+          otherParentShape
+        ];
+
+        // when
+        modeling.moveElements(
+          elements,
+          { x: 0, y: -50 },
+          rootShape,
+          { primaryShape: otherParentShape }
+        );
+
+        // then
+        expect(connection.parent).to.equal(parentShape);
+      })
+    );
 
   });
 
